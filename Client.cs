@@ -27,13 +27,13 @@ internal class Client
    
         Order o = new();
 
-        lock (Program.ordersLock)
+        lock (Program.orders)
         {
             //place the order
             Program.orders.AddFirst(o);  // do not remove this line
             
             // notify waiting cook
-            Monitor.Pulse(Program.ordersLock);
+            Monitor.Pulse(Program.orders);
         }
 
         Console.WriteLine("C: Order placed by {0}", id); // do not remove this line
@@ -41,12 +41,12 @@ internal class Client
         // sleep for a bit
         Thread.Sleep(new Random().Next(100, 500));  // do not remove this line
 
-        lock (Program.pickupsLock)
+        lock (Program.pickups)
         {
             // wait for pickup to become available
             while (Program.pickups.Count == 0)
             {
-                Monitor.Wait(Program.pickupsLock);
+                Monitor.Wait(Program.pickups);
             }
             
             // pickup the order

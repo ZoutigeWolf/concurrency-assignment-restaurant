@@ -13,10 +13,6 @@ class Program
     // variables for concurrency?
     // add the variables you need for concurrency here in case of need
 
-    public static readonly object ordersLock = new object();
-    public static readonly object pickupsLock = new object();
-    
-
     // do not add more variables after this comment.
     // feel free to change the values of the variables below to test your code
     private static readonly int total_clients = 500; // this needs to be the same as the number of cooks
