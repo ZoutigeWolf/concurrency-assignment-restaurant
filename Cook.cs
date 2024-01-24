@@ -15,13 +15,17 @@ internal class Cook
         this.thread = new Thread(DoWork);
     }
 
+    internal void Start()
+    {
+        thread.Start();
+    }
+
     internal void DoWork() // do not change the signature of this method
     // this method is not working properly
     {
         Order? o = null;
         // each cook will ONLY get a dish from ONE order and prepare it
-
-        // TODO: lock Program.ordersLock (NOT Program.orders) and wait until an order is available
+        
         lock (Program.ordersLock)
         {
             while (Program.orders.Count == 0)
@@ -42,7 +46,6 @@ internal class Cook
         o.Done(); // the order is now ready
         Console.WriteLine("K: Order is: {0}", o.isReady()); // do not remove this line
 
-        // TODO: lock Program.pickups (NOT Program.pickupsLock) and add the order to the list
         lock (Program.pickupsLock)
         {
             Program.pickups.AddFirst(o); // do not remove this line

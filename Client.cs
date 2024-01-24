@@ -27,7 +27,7 @@ internal class Client
    
         Order o = new();
 
-        lock (Program.orders)
+        lock (Program.ordersLock)
         {
             //place the order
             Program.orders.AddFirst(o);  // do not remove this line

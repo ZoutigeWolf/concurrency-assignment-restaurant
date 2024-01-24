@@ -49,6 +49,11 @@ class Program
             clients[i].thread.Join();
         }
         
+        for (int i = 0; i < cooks.Length; i++)
+        {
+            cooks[i].thread.Join();
+        }
+        
         // DO NOT CHANGE THE CODE BELOW
         // print the number of orders placed and the number of orders consumed left in the lists
         Console.WriteLine("Orders left to work: " + orders.Count);
@@ -64,7 +69,7 @@ class Program
     {   // feel free to change the code in this method if needed
         for (int i = 0; i < cooks.Length; i++)
         {
-            cooks[i].DoWork();
+            cooks[i].Start();
         }
     }
 
