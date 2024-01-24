@@ -4,7 +4,7 @@ internal class Cook
 {
     // do you need to add variables here?
     // add the variables you need for concurrency here
-
+    public Thread thread;
 
     // do not add more variables after this comment.
     private readonly int id;
@@ -12,20 +12,28 @@ internal class Cook
     public Cook(int id) // you can add more parameters if you need
     {
         this.id = id;
+        this.thread = new Thread(DoWork);
     }
-    internal void DoWork()  // do not change the signature of this method
-                            // this method is not working properly
+
+    internal void DoWork() // do not change the signature of this method
+    // this method is not working properly
     {
         Order? o = null;
         // each cook will ONLY get a dish from ONE order and prepare it
-        
+
         // TODO: lock Program.ordersLock (NOT Program.orders) and wait until an order is available
-        
-        o = Program.orders.First();     // do not remove this line
-        Program.orders.RemoveFirst();   // do not remove this line
-        
-        Console.WriteLine("K: Order taken by {0}, now preparing", id);  // do not remove this line
-        
+        lock (Program.ordersLock)
+        {
+            while (Program.orders.Count == 0)
+            {
+                Monitor.Wait(Program.ordersLock);
+            }
+            o = Program.orders.First(); // do not remove this line
+            Program.orders.RemoveFirst(); // do not remove this line
+        }
+
+        Console.WriteLine("K: Order taken by {0}, now preparing", id); // do not remove this line
+
         Thread.Sleep(new Random().Next(100, 500)); // do not remove this line
         // preparing an order takes time
 
@@ -33,15 +41,17 @@ internal class Cook
 
         o.Done(); // the order is now ready
         Console.WriteLine("K: Order is: {0}", o.isReady()); // do not remove this line
-        
-        // TODO: lock Program.pickups (NOT Program.pickupsLock) and add the order to the list
-        
-        Program.pickups.AddFirst(o);                        // do not remove this line
-        // now the client can pickup the order
-        
-        Monitor.Pulse(Program.pickupsLock);
 
-        Console.WriteLine("K: Order ready");                // do not remove this line
+        // TODO: lock Program.pickups (NOT Program.pickupsLock) and add the order to the list
+        lock (Program.pickupsLock)
+        {
+            Program.pickups.AddFirst(o); // do not remove this line
+            // now the client can pickup the order
+            Monitor.Pulse(Program.pickupsLock);
+        }
+
+        Console.WriteLine("K: Order ready"); // do not remove this line
         // each cook will terminate after preparing one order
+        
     }
 }
