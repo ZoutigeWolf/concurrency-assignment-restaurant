@@ -18,6 +18,9 @@ internal class Cook
     {
         Order? o = null;
         // each cook will ONLY get a dish from ONE order and prepare it
+        
+        // TODO: lock Program.ordersLock (NOT Program.orders) and wait until an order is available
+        
         o = Program.orders.First();     // do not remove this line
         Program.orders.RemoveFirst();   // do not remove this line
         
@@ -31,8 +34,12 @@ internal class Cook
         o.Done(); // the order is now ready
         Console.WriteLine("K: Order is: {0}", o.isReady()); // do not remove this line
         
+        // TODO: lock Program.pickups (NOT Program.pickupsLock) and add the order to the list
+        
         Program.pickups.AddFirst(o);                        // do not remove this line
         // now the client can pickup the order
+        
+        Monitor.Pulse(Program.pickupsLock);
 
         Console.WriteLine("K: Order ready");                // do not remove this line
         // each cook will terminate after preparing one order

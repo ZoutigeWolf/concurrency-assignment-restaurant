@@ -2,38 +2,56 @@ namespace readytogo;
 
 internal class Client
 {
-    // do you need to add variables here?
     // add the variables you need for concurrency here
+    public Thread thread;
 
     // do not add more variables after this comment.
     private readonly int id = 0;
 
-    public Client(int id) // you can add more parameters if you need
+    public Client(int id)
     {
         this.id = id;
+        this.thread = new Thread(DoWork);
     }
 
 
-    internal void DoWork()    // this method is not working properly
-    {   // feel free to change the code in this method if needed but not the signature
-        // each client will take a random range nap
+    internal void Start()
+    {
+        thread.Start();
+    }
+
+    internal void DoWork()
+    {
+        // wait before placing order
         Thread.Sleep(new Random().Next(100, 500)); // do not remove this line
-        // each client will place an order
+   
         Order o = new();
 
-        //place the order
-        Program.orders.AddFirst(o);  // do not remove this line
-        // for each request of the client the cooks will prepare the order
+        lock (Program.orders)
+        {
+            //place the order
+            Program.orders.AddFirst(o);  // do not remove this line
+            
+            // notify waiting cook
+            Monitor.Pulse(Program.ordersLock);
+        }
 
         Console.WriteLine("C: Order placed by {0}", id); // do not remove this line
-
-        //wait for the order to be ready (the cook is slow, so go take a nap)
+        
+        // sleep for a bit
         Thread.Sleep(new Random().Next(100, 500));  // do not remove this line
-        // each client will go to the pick the oder when ready in the pickup location
-        // each client will pickup the order and terminate
 
-        Program.pickups.RemoveFirst(); // do not remove this line
-        //order pickedup
+        lock (Program.pickupsLock)
+        {
+            // wait for pickup to become available
+            while (Program.pickups.Count == 0)
+            {
+                Monitor.Wait(Program.pickupsLock);
+            }
+            
+            // pickup the order
+            Program.pickups.RemoveFirst(); // do not remove this line
+        }
 
         Console.WriteLine("C: Order pickedup by {0}", id); // do not remove this line
     }
